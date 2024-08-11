@@ -1,0 +1,50 @@
+import mysql.connector
+from mysql.connector import Error
+
+# Database credentials
+DB_CONFIG = {
+    'user': 'root',
+    'password': 'my-secret-pw',
+    'host': 'localhost',
+    'database': 'airline_db'
+}
+
+# Helper function to execute DDL commands
+def execute_query(query):
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        cursor = connection.cursor()
+        cursor.execute(query)
+        connection.commit()
+        print("Query executed successfully")
+    except Error as e:
+        print(f"Error: {e}")
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+# Optimize table structure
+def optimize_table():
+    # Example DDL statements for optimizing the `tweets` table
+    queries = [
+        # Add an index to improve search performance on `tweet_text`
+        "CREATE INDEX IF NOT EXISTS idx_tweet_text ON tweets (tweet_text)",
+        
+        # Alter column to better match the expected data size and type
+        "ALTER TABLE tweets MODIFY COLUMN tweet_text VARCHAR(280)",
+        
+        # Change table engine for better performance
+        "ALTER TABLE tweets ENGINE = InnoDB",
+        
+        # Add a unique constraint if applicable
+        "ALTER TABLE tweets ADD CONSTRAINT IF NOT EXISTS unique_tweet UNIQUE (tweet_id)"
+    ]
+    
+    for query in queries:
+        execute_query(query)
+
+# Example usage
+if __name__ == "__main__":
+    print("Optimizing table structure...")
+    optimize_table()
